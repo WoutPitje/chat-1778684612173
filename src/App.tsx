@@ -4,7 +4,7 @@ import { Sparkles } from "lucide-react"
 
 export default function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-8 bg-blue-600">
+    <div className="min-h-screen flex items-center justify-center p-8 bg-red-600">
       <Card className="max-w-md w-full">
         <CardHeader>
           <div className="flex items-center gap-2">

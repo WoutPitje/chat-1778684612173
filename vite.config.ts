@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 
+const HMR_PORT = process.env.HMR_PORT ? Number(process.env.HMR_PORT) : undefined
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
@@ -13,6 +15,6 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     watch: { usePolling: true, interval: 300 },
-    hmr: { clientPort: 5173 },
+    hmr: HMR_PORT ? { host: 'localhost', clientPort: HMR_PORT } : true,
   },
 })
