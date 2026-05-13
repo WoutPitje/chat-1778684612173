@@ -94,7 +94,12 @@ function ChatPage({ user }: { user: User }) {
     const channel = supabase
       .channel("messages")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
-        setMessages((prev) => [...prev, payload.new as Message])
+        const incoming = payload.new as Message
+        setMessages((prev) => {
+          const alreadyExists = prev.some((m) => m.id === incoming.id)
+          if (alreadyExists) return prev
+          return [...prev, incoming]
+        })
       })
       .subscribe()
 
@@ -109,12 +114,23 @@ function ChatPage({ user }: { user: User }) {
     e.preventDefault()
     if (!input.trim()) return
     setSending(true)
-    await supabase.from("messages").insert({
+    const optimistic: Message = {
+      id: crypto.randomUUID(),
+      user_id: user.id,
+      email: user.email!,
+      content: input.trim(),
+      created_at: new Date().toISOString(),
+    }
+    setMessages((prev) => [...prev, optimistic])
+    setInput("")
+    const { data } = await supabase.from("messages").insert({
       user_id: user.id,
       email: user.email,
-      content: input.trim(),
-    })
-    setInput("")
+      content: optimistic.content,
+    }).select().single()
+    if (data) {
+      setMessages((prev) => prev.map((m) => m.id === optimistic.id ? data : m))
+    }
     setSending(false)
   }
 
